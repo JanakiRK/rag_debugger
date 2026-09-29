@@ -62,12 +62,32 @@ def retrieve(query: str):
     )
 
 def debug_retrieval(result: RetrievalResult):
-    status = "ok" if result.documents else "no_results"
+    if not result.documents:
+        status = "no_results"
+    elif max(result.scores) < 1.0:
+        status = "weak"
+    else:
+        status = "ok"
+
+    if status == "no_results":
+        message = "No relevant documents found."
+    elif status == "weak":
+        message = "Documents found, but retrieval confidence is weak."
+    else:
+        message = "Relevant documents found."
+
+    best_document = None
+
+    if result.documents:
+        best_index = result.scores.index(max(result.scores))
+        best_document = result.documents[best_index].id
 
     return {
         "query": result.query,
         "documents_found": len(result.documents),
         "status": status,
+        "message": message,
+        "best_document": best_document,
         "documents": [
             {
                 "id": document.id,

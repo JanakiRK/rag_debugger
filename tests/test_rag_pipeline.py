@@ -25,3 +25,30 @@ def test_debug_retrieval():
     assert debug["documents_found"] == 2
     assert debug["documents"][0]["id"] == "doc1"
     assert debug["documents"][0]["score"] == 1.0
+
+def test_retrieve_no_results():
+    result = retrieve("JavaScript")
+
+    assert len(result.documents) == 0
+    assert result.scores == []
+
+def test_debug_retrieval_no_results():
+    result = retrieve("JavaScript")
+    debug = debug_retrieval(result)
+
+    assert debug["status"] == "no_results"
+    assert debug["message"] == "No relevant documents found."
+
+def test_debug_retrieval_weak():
+    result = retrieve("Azure programming")
+
+    debug = debug_retrieval(result)
+
+    assert debug["status"] == "weak"
+    assert debug["message"] == "Documents found, but retrieval confidence is weak."
+
+def test_debug_retrieval_best_document():
+    result = retrieve("AI data")
+    debug = debug_retrieval(result)
+
+    assert debug["best_document"] == "doc1"
