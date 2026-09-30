@@ -52,3 +52,9 @@ def test_debug_retrieval_best_document():
     debug = debug_retrieval(result)
 
     assert debug["best_document"] == "doc1"
+
+def test_debug_retrieval_best_score():
+    result = retrieve("AI data")
+    debug = debug_retrieval(result)
+
+    assert debug["best_score"] == 1.0

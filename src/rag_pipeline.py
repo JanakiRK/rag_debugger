@@ -82,12 +82,15 @@ def debug_retrieval(result: RetrievalResult):
         best_index = result.scores.index(max(result.scores))
         best_document = result.documents[best_index].id
 
+    best_score = max(result.scores) if result.scores else 0.0
+
     return {
         "query": result.query,
         "documents_found": len(result.documents),
         "status": status,
         "message": message,
         "best_document": best_document,
+        "best_score": best_score,
         "documents": [
             {
                 "id": document.id,
