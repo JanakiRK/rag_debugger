@@ -58,3 +58,24 @@ def test_debug_retrieval_best_score():
     debug = debug_retrieval(result)
 
     assert debug["best_score"] == 1.0
+
+def test_debug_retrieval_expected_document():
+    result = retrieve("RAG")
+
+    debug = debug_retrieval(result, "doc3")
+
+    assert debug["expected_document"] == "doc3"
+
+def test_debug_retrieval_correct_document():
+    result = retrieve("RAG")
+
+    debug = debug_retrieval(result, "doc3")
+
+    assert debug["retrieval_correct"] is True
+
+def test_debug_retrieval_wrong_document():
+    result = retrieve("RAG")
+
+    debug = debug_retrieval(result, "doc1")
+
+    assert debug["retrieval_correct"] is False

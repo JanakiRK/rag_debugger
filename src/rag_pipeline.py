@@ -61,9 +61,24 @@ def retrieve(query: str):
         scores=scores,
     )
 
-def debug_retrieval(result: RetrievalResult):
+def debug_retrieval(
+    result: RetrievalResult,
+    expected_document_id: str | None = None,
+):
+    best_document = None
+    if result.documents:
+        best_index = result.scores.index(max(result.scores))
+        best_document = result.documents[best_index].id
+
+    best_score = max(result.scores) if result.scores else 0.0
+    retrieval_correct = (
+            expected_document_id is not None
+            and best_document == expected_document_id
+    )
     if not result.documents:
         status = "no_results"
+    elif expected_document_id is not None and not retrieval_correct:
+        status = "incorrect"
     elif max(result.scores) < 1.0:
         status = "weak"
     else:
@@ -71,18 +86,12 @@ def debug_retrieval(result: RetrievalResult):
 
     if status == "no_results":
         message = "No relevant documents found."
+    elif status == "incorrect":
+        message = "Retrieved document does not match the expected document."
     elif status == "weak":
         message = "Documents found, but retrieval confidence is weak."
     else:
         message = "Relevant documents found."
-
-    best_document = None
-
-    if result.documents:
-        best_index = result.scores.index(max(result.scores))
-        best_document = result.documents[best_index].id
-
-    best_score = max(result.scores) if result.scores else 0.0
 
     return {
         "query": result.query,
@@ -90,6 +99,8 @@ def debug_retrieval(result: RetrievalResult):
         "status": status,
         "message": message,
         "best_document": best_document,
+        "expected_document": expected_document_id,
+        "retrieval_correct": retrieval_correct,
         "best_score": best_score,
         "documents": [
             {
