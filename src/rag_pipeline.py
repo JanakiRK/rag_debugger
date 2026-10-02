@@ -46,14 +46,14 @@ def retrieve(query: str):
             results.append(document)
             scores.append(matched_words / len(query_words))
 
-        ranked = sorted(
-            zip(results, scores),
-            key=lambda item: item[1],
-            reverse=True,
-        )
+    ranked = sorted(
+        zip(results, scores),
+        key=lambda item: item[1],
+        reverse=True,
+    )
 
-        results = [item[0] for item in ranked]
-        scores = [item[1] for item in ranked]
+    results = [item[0] for item in ranked]
+    scores = [item[1] for item in ranked]
 
     return RetrievalResult(
         query=query,
@@ -87,7 +87,10 @@ def debug_retrieval(
     if status == "no_results":
         message = "No relevant documents found."
     elif status == "incorrect":
-        message = "Retrieved document does not match the expected document."
+        message = (
+            f"Expected document '{expected_document_id}', "
+            f"but retrieved '{best_document}'."
+        )
     elif status == "weak":
         message = "Documents found, but retrieval confidence is weak."
     else:
