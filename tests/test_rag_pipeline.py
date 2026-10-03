@@ -62,9 +62,9 @@ def test_debug_retrieval_best_score():
 def test_debug_retrieval_expected_document():
     result = retrieve("RAG")
 
-    debug = debug_retrieval(result, "doc3")
+    debug = debug_retrieval(result, ["doc3"])
 
-    assert debug["expected_document"] == "doc3"
+    assert debug["expected_documents"] == ["doc3"]
 
 def test_debug_retrieval_correct_document():
     result = retrieve("RAG")
@@ -79,3 +79,52 @@ def test_debug_retrieval_wrong_document():
     debug = debug_retrieval(result, "doc1")
 
     assert debug["retrieval_correct"] is False
+
+def test_debug_retrieval_multiple_expected_documents():
+    result = retrieve("RAG")
+
+    debug = debug_retrieval(result, ["doc1", "doc3"])
+
+    assert debug["retrieval_correct"] is True
+
+def test_debug_retrieval_unexpected_document():
+    result = retrieve("RAG")
+
+    debug = debug_retrieval(result, ["doc1", "doc2"])
+
+    assert debug["retrieval_correct"] is False
+
+def test_debug_retrieval_multiple_relevant_documents():
+    result = retrieve("AI data")
+
+    debug = debug_retrieval(result, ["doc1", "doc2"])
+
+    assert debug["documents_found"] == 2
+
+def test_debug_retrieval_recall():
+    result = retrieve("AI data")
+
+    debug = debug_retrieval(result, ["doc1", "doc2"])
+
+    assert debug["recall"] == 1.0
+
+def test_debug_retrieval_partial_recall():
+    result = retrieve("AI data")
+
+    debug = debug_retrieval(result, ["doc1", "doc3"])
+
+    assert debug["recall"] == 0.5
+
+def test_debug_retrieval_recall_no_results():
+    result = retrieve("JavaScript")
+
+    debug = debug_retrieval(result, ["doc1", "doc2"])
+
+    assert debug["recall"] == 0.0
+
+def test_debug_retrieval_recall_percentage():
+    result = retrieve("AI data")
+
+    debug = debug_retrieval(result, ["doc1", "doc3"])
+
+    assert debug["recall_percentage"] == 50.0

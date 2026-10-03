@@ -63,7 +63,7 @@ def retrieve(query: str):
 
 def debug_retrieval(
     result: RetrievalResult,
-    expected_document_id: str | None = None,
+    expected_document_ids: list[str] | None = None,
 ):
     best_document = None
     if result.documents:
@@ -72,13 +72,22 @@ def debug_retrieval(
 
     best_score = max(result.scores) if result.scores else 0.0
     retrieval_correct = (
-            expected_document_id is not None
-            and best_document == expected_document_id
+            expected_document_ids is not None
+            and best_document in expected_document_ids
     )
+    recall = None
+
+    if expected_document_ids:
+        retrieved_ids = {document.id for document in result.documents}
+        expected_ids = set(expected_document_ids)
+
+        recall = len(retrieved_ids & expected_ids) / len(expected_ids)
     if not result.documents:
         status = "no_results"
-    elif expected_document_id is not None and not retrieval_correct:
+    elif expected_document_ids is not None and not retrieval_correct:
         status = "incorrect"
+    elif recall is not None and recall < 1.0:
+        status = "weak"
     elif max(result.scores) < 1.0:
         status = "weak"
     else:
@@ -88,7 +97,7 @@ def debug_retrieval(
         message = "No relevant documents found."
     elif status == "incorrect":
         message = (
-            f"Expected document '{expected_document_id}', "
+            f"Expected one of {expected_document_ids}, "
             f"but retrieved '{best_document}'."
         )
     elif status == "weak":
@@ -102,9 +111,11 @@ def debug_retrieval(
         "status": status,
         "message": message,
         "best_document": best_document,
-        "expected_document": expected_document_id,
+        "expected_documents": expected_document_ids,
         "retrieval_correct": retrieval_correct,
         "best_score": best_score,
+        "recall": recall,
+        "recall_percentage": recall * 100 if recall is not None else None,
         "documents": [
             {
                 "id": document.id,
